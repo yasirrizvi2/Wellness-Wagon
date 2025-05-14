@@ -1,7 +1,6 @@
-const express   = require('express');
+const express = require('express');
 const verifyToken = require('../middleware/authmiddleware.js');
 const authorizeRole = require('../middleware/rolemiddleware.js');
-
 const router = express.Router();
 
 router.get('/admin', verifyToken, authorizeRole("admin"), (req, res) => {

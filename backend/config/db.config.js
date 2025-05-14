@@ -9,7 +9,7 @@ class DatabaseConnection {
   async connect() {
     try {
       const conn = await this.mongoose.connect(process.env.MONGODB_URI, {
-        dbName: "todoapp",
+        dbName: "Wellness-Wagon",
       });
       console.log(`✅ MongoDB Connected: ${conn.connection.host} ${conn.connection.name}`);
     } catch (err) {

@@ -2,18 +2,25 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/usermodel');
 
-
 const registerUser = async (req, res) => {
-    
     try {
-        if (!req.body.username || !req.body.password) {
-            return res.status(400).json({ message: "Username and password are required" });
-        }
-        const { username, password, role} = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
+      const {name, email, password, roles} = req.body;
+        
+      if (!name || !email || !password) {
+            return res.status(400).json({ message: "name, email and password are required" });
+      }
 
-        const newUser = await User.create({username, password: hashedPassword, role});
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = await User.create({
+          name,
+          email,
+          password: hashedPassword,
+          roles
+        });
+
         res.status(201).json({ message: "User registered successfully", user: newUser });
+
     } catch (error) {
         console.error("Error registering user:", error);
         if (error.code === 11000) {
@@ -26,24 +33,28 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { username, password} = req.body;
     
-    if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required" });
+    const {email, password} = req.body;
+    
+    if (!email|| !password) {
+      return res.status(400).json({ message: "email and password are required" });
     }
     
-    const user = await User.findOne({username});
+    const user = await User.findOne({email});
     if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     } 
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+       id: user._id,
+       role: user.role
+      },
       process.env.JWT_SECRET, { expiresIn: '1h' }
     );
 
